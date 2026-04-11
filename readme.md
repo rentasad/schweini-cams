@@ -1,35 +1,37 @@
-# Schweini-Cams for Raspberry Pi
+# 🐹 Schweini-Cams for Raspberry Pi
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-ready-blue.svg?logo=docker)](https://www.docker.com/)
+[![Vibe Coding](https://img.shields.io/badge/Vibe--Coding-built%20with%20%E2%9C%A8-ff69b4)](https://github.com/topics/vibe-coding)
 
 A lightweight multi-camera browser setup for Raspberry Pi using USB webcams, uStreamer, Docker Compose, and a small split-view web UI.
+
+> ✨ **Note:** Dieses Projekt ist durch **Vibe-Coding** entstanden – fokussiert auf schnellen Fortschritt, Intuition und Spaß am Bauen.
 
 This project is designed for simple live monitoring without recording.
 Typical use case: watching a guinea pig cage from two or more angles in the browser.
 
-## Features
+## 🚀 Features
 
-* lightweight live streaming with uStreamer
-* browser-based camera view
-* split-view for two cameras
-* click one camera to enlarge it
-* second camera remains visible as preview
-* easy Docker Compose setup
-* camera device, resolution, and FPS configurable via `.env`
-* extendable to a third camera
+* **Lightweight:** High-performance live streaming with uStreamer.
+* **Browser-based:** Multi-camera view directly in your browser.
+* **Smart UI:** Split-view for two cameras, click to enlarge, preview remains visible.
+* **Dockerized:** Easy setup via Docker Compose.
+* **Configurable:** Camera device, resolution, and FPS via `.env`.
+* **Scalable:** Easily extendable to 3 or more cameras.
 
-## Use case
+## 🐹 Use case
 
 This setup is intended for:
 
-* Raspberry Pi 4
-* 2 USB webcams
-* simple live view only
-* no recording
-* no motion detection
-* no heavy NVR software
+* Raspberry Pi 4 (or similar)
+* 2+ USB webcams
+* Simple live view only (low latency)
+* **No** recording, **no** motion detection, **no** heavy NVR software.
 
-It is ideal for low-maintenance local monitoring.
+It is ideal for low-maintenance local monitoring of pets or small areas.
 
-## Project structure
+## 📂 Project structure
 
 ```text
 .
@@ -40,11 +42,11 @@ It is ideal for low-maintenance local monitoring.
     └── nginx.conf
 ```
 
-## Requirements
+## 🛠 Requirements
 
-* Raspberry Pi 4
+* Raspberry Pi 4 (or compatible)
 * Raspberry Pi OS with Docker and Docker Compose plugin installed
-* 2 compatible USB webcams
+* 2+ compatible USB webcams
 * `v4l2-ctl` installed for camera inspection
 
 Install `v4l2-ctl` if needed:
@@ -54,7 +56,7 @@ sudo apt update
 sudo apt install -y v4l-utils
 ```
 
-## Find your camera devices
+## 🔍 Find your camera devices
 
 List available video devices:
 
@@ -62,7 +64,7 @@ List available video devices:
 v4l2-ctl --list-devices
 ```
 
-Typical output may look like this:
+Typical output:
 
 ```text
 USB Live camera:
@@ -76,25 +78,20 @@ USB 2.0 Camera:
     /dev/video5
 ```
 
-Many webcams expose multiple `/dev/videoX` devices.
-Usually only one of them is the actual video stream you want.
+Many webcams expose multiple `/dev/videoX` devices. Usually only one of them is the actual video stream.
 
-To inspect supported formats:
+Inspect supported formats:
 
 ```bash
 v4l2-ctl -d /dev/video0 --list-formats-ext
 v4l2-ctl -d /dev/video4 --list-formats-ext
 ```
 
-For this project, the relevant device is typically the one offering JPEG/MJPEG video modes in usable resolutions such as:
+Relevant devices typically offer **JPEG/MJPEG** modes in resolutions like `1280x720` or `1920x1080`.
 
-* 640x480
-* 1280x720
-* 1920x1080
+## ⚙️ Configuration
 
-## Configuration
-
-All important camera-specific settings are stored in `.env`.
+All camera settings are stored in `.env`.
 
 Example:
 
@@ -108,7 +105,7 @@ CAM2_RESOLUTION=1280x720
 CAM2_FPS=15
 ```
 
-## Docker Compose
+## 🐳 Docker Compose
 
 Example `compose.yaml`:
 
@@ -164,18 +161,16 @@ services:
       - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 ```
 
-## Web frontend
+## 🌐 Web Frontend
 
-The web frontend is served via nginx and provides:
+The web frontend is served via Nginx and provides:
 
-* split-view for both cameras
-* click a camera to enlarge it
-* the second camera stays visible as a small preview
-* double-click returns to split-view
+* **Split-view** for both cameras.
+* **Focus mode:** Click a camera to enlarge it.
+* **Preview:** The second camera stays visible as a small preview.
+* **Reset:** Double-click returns to split-view.
 
-## Start the stack
-
-From the project folder:
+## 🏁 Start the stack
 
 ```bash
 docker compose up -d
@@ -187,166 +182,47 @@ Check logs:
 docker compose logs -f
 ```
 
-Open in browser:
+Open in browser: `http://<RASPBERRYPI-IP>:8090`
 
-```text
-http://RASPBERRYPI-IP:8090
-```
+## 🔗 Direct stream URLs
 
-## Direct stream URLs
+Raw uStreamer feeds:
 
-If needed, the raw uStreamer feeds are also available directly:
+* **Camera 1:** `http://<RASPBERRYPI-IP>:8081/stream`
+* **Camera 2:** `http://<RASPBERRYPI-IP>:8082/stream`
 
-* Camera 1: `http://RASPBERRYPI-IP:8081/stream`
-* Camera 2: `http://RASPBERRYPI-IP:8082/stream`
+---
 
-## Notes about image format
+## 💡 Tips & Troubleshooting
 
-If uStreamer exits with an error like:
+### Format Issues
+If uStreamer fails with `Unknown pixel format: MJPEG`, ensure you use `--format=JPEG`. uStreamer expects the literal string `JPEG` for MJPEG devices.
 
-```text
-Unknown pixel format: MJPEG; available: YUYV, UYVY, RGB565, RGB24, JPEG
-```
+### Performance
+For Pi 4, `1280x720` @ `15 FPS` is a sweet spot. If it's choppy, try `960x540` or `10 FPS`.
 
-use:
+### Persistent Device Names
+USB device numbering (`/dev/video0`, `/dev/video4`) can change on reboot. For a rock-solid setup, use `/dev/v4l/by-id/...` paths or udev rules.
 
-```text
---format=JPEG
-```
+### Camera exposure quirks
+Some webcams flicker under indoor light. Try increasing FPS or disabling auto-exposure via `v4l2-ctl`.
 
-not:
+## 🏗 Extending to a third camera
 
-```text
---format=MJPEG
-```
+1. Add `CAM3_*` variables to `.env`.
+2. Add a `cam3` service to `compose.yaml`.
+3. Update `web/nginx.conf` and `web/index.html`.
 
-uStreamer expects the camera pixel format name `JPEG` here.
-
-## Performance recommendations
-
-For Raspberry Pi 4 and simple live monitoring, these settings work well:
-
-* resolution: `1280x720`
-* fps: `15`
-* format: `JPEG`
-* no recording
-* no audio
-
-If playback is choppy on some phones or tablets, try reducing load:
-
-* `960x540`
-* `640x480`
-* `10` or `15` fps
-
-Different phones and browsers handle MJPEG streams differently.
-
-## Camera auto-exposure quirks
-
-Some USB webcams may show brightness pumping or flickering, especially under indoor lighting.
-
-Check current camera settings:
-
-```bash
-v4l2-ctl -d /dev/video4 --all
-v4l2-ctl -d /dev/video4 -L
-```
-
-Common causes include:
-
-* auto exposure
-* dynamic framerate exposure
-* automatic white balance
-* backlight compensation
-
-In one real-world case, increasing FPS from `10` to `20` significantly improved brightness stability.
-
-## Troubleshooting
-
-### A camera does not show video
-
-Check which device is the correct one:
-
-```bash
-v4l2-ctl --list-devices
-v4l2-ctl -d /dev/video0 --list-formats-ext
-v4l2-ctl -d /dev/video4 --list-formats-ext
-```
-
-### Container exits immediately
-
-Inspect logs:
-
-```bash
-docker compose logs -f cam1
-docker compose logs -f cam2
-```
-
-### Browser playback is choppy
-
-Try:
-
-* lower resolution
-* lower FPS
-* test another browser
-* disable battery saver on mobile devices
-* check Wi-Fi quality
-
-### Device numbering changes after reboot
-
-USB webcam numbering (`/dev/video0`, `/dev/video4`, etc.) may change after reboot or reconnect.
-
-For a more robust setup, consider using persistent device naming via udev rules in the future.
-
-## Extending to a third camera
-
-You can add a third camera by:
-
-1. defining `CAM3_*` variables in `.env`
-2. adding a `cam3` service in `compose.yaml`
-3. extending nginx routes
-4. adding the stream to the frontend
-
-Example `.env` extension:
-
-```dotenv
-CAM3_DEVICE=/dev/video6
-CAM3_RESOLUTION=1280x720
-CAM3_FPS=15
-```
-
-## Why this project?
-
-This project intentionally avoids heavy surveillance stacks such as:
-
-* NVR systems
-* motion detection
-* recording databases
-* AI object detection
-
-The goal is to keep everything:
-
-* simple
-* fast
-* lightweight
-* easy to understand
-* easy to share with friends and family
-
-## Credits
+## 📜 Credits
 
 Built with:
+* [uStreamer](https://github.com/pikvm/ustreamer) (by PiKVM)
+* [Docker Compose](https://www.docker.com/)
+* [Nginx](https://nginx.org/)
 
-* Raspberry Pi
-* Docker Compose
-* uStreamer
-* nginx
+---
 
-uStreamer:
-[https://github.com/pikvm/ustreamer](https://github.com/pikvm/ustreamer)
-
-Docker image used here:
-[https://hub.docker.com/r/beholderrpa/ustreamer](https://hub.docker.com/r/beholderrpa/ustreamer)
-
-## License
+## ⚖️ License
 
 MIT
 
