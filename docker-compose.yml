@@ -13,7 +13,7 @@ services:
       - "--desired-fps=${CAM1_FPS}"
       - "--format=JPEG"
       - "--persistent"
-      - "--drop-same-frames=30"
+#      - "--drop-same-frames=30"
     ports:
       - "8081:8080"
 
@@ -31,9 +31,28 @@ services:
       - "--desired-fps=${CAM2_FPS}"
       - "--format=JPEG"
       - "--persistent"
-      - "--drop-same-frames=30"
+#      - "--drop-same-frames=30"
     ports:
       - "8082:8080"
+      
+  cam3:
+    image: beholderrpa/ustreamer:latest
+    container_name: ustreamer-cam3
+    restart: unless-stopped
+    devices:
+      - "${CAM3_DEVICE}:/dev/video0"
+    command:
+      - "--device=/dev/video0"
+      - "--host=0.0.0.0"
+      - "--port=8080"
+      - "--resolution=${CAM3_RESOLUTION}"
+      - "--desired-fps=${CAM3_FPS}"
+      - "--format=JPEG"
+      - "--persistent"
+#      - "--drop-same-frames=30"
+    ports:
+      - "8083:8080"
+
 
   web:
     image: nginx:alpine
@@ -42,6 +61,7 @@ services:
     depends_on:
       - cam1
       - cam2
+      - cam3
     ports:
       - "8090:80"
     volumes:
