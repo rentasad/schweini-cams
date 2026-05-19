@@ -1,6 +1,7 @@
 services:
   cam1:
     image: beholderrpa/ustreamer:latest
+    platform: linux/arm64
     container_name: ustreamer-cam1
     restart: unless-stopped
     devices:
@@ -19,6 +20,7 @@ services:
 
   cam2:
     image: beholderrpa/ustreamer:latest
+    platform: linux/arm64
     container_name: ustreamer-cam2
     restart: unless-stopped
     devices:
@@ -37,6 +39,7 @@ services:
       
   cam3:
     image: beholderrpa/ustreamer:latest
+    platform: linux/arm64
     container_name: ustreamer-cam3
     restart: unless-stopped
     devices:

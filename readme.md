@@ -4,96 +4,101 @@
 [![Docker](https://img.shields.io/badge/Docker-ready-blue.svg?logo=docker)](https://www.docker.com/)
 [![Vibe Coding](https://img.shields.io/badge/Vibe--Coding-built%20with%20%E2%9C%A8-ff69b4)](https://github.com/topics/vibe-coding)
 
-A lightweight multi-camera browser setup for Raspberry Pi using USB webcams, uStreamer, Docker Compose, and a small split-view web UI.
+Ein leichtgewichtiges Multi-Kamera-Setup für den Raspberry Pi mit USB-Webcams, uStreamer, Docker Compose und einem modernen Split-View-Web-UI.
 
-> ✨ **Note:** Dieses Projekt ist durch **Vibe-Coding** entstanden – fokussiert auf schnellen Fortschritt, Intuition und Spaß am Bauen.
+> ✨ **Hinweis:** Dieses Projekt ist durch **Vibe-Coding** entstanden – fokussiert auf schnellen Fortschritt, Intuition und Spaß am Bauen.
 
-This project is designed for simple live monitoring without recording.
-Typical use case: watching a guinea pig cage from two or more angles in the browser.
+Dieses Projekt ist für die einfache Live-Überwachung ohne Aufzeichnung konzipiert.
+Typischer Anwendungsfall: Beobachtung eines Meerschweinchengeheges aus drei oder mehr Blickwinkeln im Browser.
 
 ## 🚀 Features
 
-* **Lightweight:** High-performance live streaming with uStreamer.
-* **Browser-based:** Multi-camera view directly in your browser.
-* **Smart UI:** Split-view for two cameras, click to enlarge, preview remains visible.
-* **Dockerized:** Easy setup via Docker Compose.
-* **Configurable:** Camera device, resolution, and FPS via `.env`.
-* **Scalable:** Easily extendable to 3 or more cameras.
+* **Leichtgewichtig:** Hochleistungs-Live-Streaming mit uStreamer.
+* **Browser-basiert:** Multi-Kamera-Ansicht direkt im Browser (optimiert für 1-3 Kameras).
+* **Smart UI:** 
+    - Dynamisches Grid-Layout (passt sich automatisch an die Anzahl der Kameras an).
+    - **Fokus-Modus:** Klicke eine Kamera an, um sie zu vergrößern.
+    - **Vorschau:** Die anderen Kameras bleiben als Miniaturansicht/Vorschau verfügbar.
+    - **Reset:** Klick auf "Splitview" oder Doppelklick kehrt zur Gesamtübersicht zurück.
+* **Modularer Aufbau:** Saubere Trennung von HTML, CSS und JavaScript für einfache Anpassbarkeit.
+* **Dockerized:** Einfaches Setup via Docker Compose.
+* **Konfigurierbar:** Kamera-Geräte, Auflösung und FPS via `.env`.
 
-## 🐹 Use case
+## 🐹 Anwendungsfall
 
-This setup is intended for:
+Dieses Setup ist gedacht für:
 
-* Raspberry Pi 4 (or similar)
-* 2+ USB webcams
-* Simple live view only (low latency)
-* **No** recording, **no** motion detection, **no** heavy NVR software.
+* Raspberry Pi 4 (oder vergleichbar)
+* 1-3+ USB-Webcams
+* Nur Live-Ansicht (sehr geringe Latenz)
+* **Keine** Aufnahme, **keine** Bewegungserkennung, **keine** schwere NVR-Software.
 
-It is ideal for low-maintenance local monitoring of pets or small areas.
+Ideal für die wartungsarme lokale Überwachung von Haustieren oder kleinen Bereichen.
 
-## 📂 Project structure
+## 📂 Projektstruktur
 
 ```text
 .
-├── compose.yaml
+├── docker-compose.yml
 ├── .env
 └── web/
     ├── index.html
-    └── nginx.conf
+    ├── nginx.conf
+    ├── css/
+    │   └── style.css
+    └── js/
+        └── app.js
 ```
 
-## 🛠 Requirements
+## 🛠 Voraussetzungen
 
-* Raspberry Pi 4 (or compatible)
-* Raspberry Pi OS with Docker and Docker Compose plugin installed
-* 2+ compatible USB webcams
-* `v4l2-ctl` installed for camera inspection
+* Raspberry Pi 4 (oder kompatibel)
+* Raspberry Pi OS mit installiertem Docker und Docker Compose Plugin
+* 1-3 kompatible USB-Webcams
+* `v4l2-ctl` installiert zur Kamera-Inspektion
 
-Install `v4l2-ctl` if needed:
+`v4l2-ctl` installieren, falls benötigt:
 
 ```bash
 sudo apt update
 sudo apt install -y v4l-utils
 ```
 
-## 🔍 Find your camera devices
+## 🔍 Kamera-Devices finden
 
-List available video devices:
+Liste verfügbare Video-Geräte auf:
 
 ```bash
 v4l2-ctl --list-devices
 ```
 
-Typical output:
+Typische Ausgabe:
 
 ```text
 USB Live camera:
     /dev/video0
     /dev/video1
-    /dev/video2
-    /dev/video3
 
 USB 2.0 Camera:
     /dev/video4
     /dev/video5
 ```
 
-Many webcams expose multiple `/dev/videoX` devices. Usually only one of them is the actual video stream.
+Viele Webcams legen mehrere `/dev/videoX` Devices an. Normalerweise ist nur eines davon der eigentliche Video-Stream.
 
-Inspect supported formats:
+Unterstützte Formate prüfen:
 
 ```bash
 v4l2-ctl -d /dev/video0 --list-formats-ext
-v4l2-ctl -d /dev/video4 --list-formats-ext
 ```
 
-Relevant devices typically offer **JPEG/MJPEG** modes in resolutions like `1280x720` or `1920x1080`.
+Relevante Geräte bieten typischerweise **JPEG/MJPEG** Modi in Auflösungen wie `1280x720` oder `1920x1080` an.
 
-## ⚙️ Configuration
+## ⚙️ Konfiguration
 
-All camera settings are stored in `.env`.
+Alle Kamera-Einstellungen werden in der `.env` Datei gespeichert.
 
-Example:
+Beispiel für 3 Kameras:
 
 ```dotenv
 CAM1_DEVICE=/dev/video0
@@ -103,126 +108,74 @@ CAM1_FPS=15
 CAM2_DEVICE=/dev/video4
 CAM2_RESOLUTION=1280x720
 CAM2_FPS=15
+
+CAM3_DEVICE=/dev/video8
+CAM3_RESOLUTION=1280x720
+CAM3_FPS=15
 ```
 
 ## 🐳 Docker Compose
 
-Example `compose.yaml`:
-
-```yaml
-services:
-  cam1:
-    image: beholderrpa/ustreamer:latest
-    container_name: ustreamer-cam1
-    restart: unless-stopped
-    devices:
-      - "${CAM1_DEVICE}:/dev/video0"
-    command:
-      - "--device=/dev/video0"
-      - "--host=0.0.0.0"
-      - "--port=8080"
-      - "--resolution=${CAM1_RESOLUTION}"
-      - "--desired-fps=${CAM1_FPS}"
-      - "--format=JPEG"
-      - "--persistent"
-      - "--drop-same-frames=30"
-    ports:
-      - "8081:8080"
-
-  cam2:
-    image: beholderrpa/ustreamer:latest
-    container_name: ustreamer-cam2
-    restart: unless-stopped
-    devices:
-      - "${CAM2_DEVICE}:/dev/video0"
-    command:
-      - "--device=/dev/video0"
-      - "--host=0.0.0.0"
-      - "--port=8080"
-      - "--resolution=${CAM2_RESOLUTION}"
-      - "--desired-fps=${CAM2_FPS}"
-      - "--format=JPEG"
-      - "--persistent"
-      - "--drop-same-frames=30"
-    ports:
-      - "8082:8080"
-
-  web:
-    image: nginx:alpine
-    container_name: schweini-web
-    restart: unless-stopped
-    depends_on:
-      - cam1
-      - cam2
-    ports:
-      - "8090:80"
-    volumes:
-      - ./web/index.html:/usr/share/nginx/html/index.html:ro
-      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-```
-
-## 🌐 Web Frontend
-
-The web frontend is served via Nginx and provides:
-
-* **Split-view** for both cameras.
-* **Focus mode:** Click a camera to enlarge it.
-* **Preview:** The second camera stays visible as a small preview.
-* **Reset:** Double-click returns to split-view.
-
-## 🏁 Start the stack
+Das Setup startet für jede Kamera einen eigenen uStreamer-Container und einen Nginx als Webserver/Proxy.
 
 ```bash
+# Starten des Stacks
 docker compose up -d
 ```
 
-Check logs:
+Der Web-Server ist standardmäßig unter Port `8090` erreichbar.
 
-```bash
-docker compose logs -f
-```
+## 🌐 Web Frontend
 
-Open in browser: `http://<RASPBERRYPI-IP>:8090`
+Das Frontend wird via Nginx ausgeliefert und ist nun modular aufgebaut:
+- `web/index.html`: Struktur
+- `web/css/style.css`: Dynamisches Layout (Flex/Grid)
+- `web/js/app.js`: Kamera-Logik und Interaktion
 
-## 🔗 Direct stream URLs
+Du kannst weitere Kameras einfach im `cams`-Array in der `js/app.js` hinzufügen.
 
-Raw uStreamer feeds:
+## 🏁 Schnellstart
 
-* **Camera 1:** `http://<RASPBERRYPI-IP>:8081/stream`
-* **Camera 2:** `http://<RASPBERRYPI-IP>:8082/stream`
+1. Klone das Repo.
+2. Erstelle eine `.env` basierend auf deinen Kamera-Devices.
+3. Führe `docker compose up -d` aus.
+4. Öffne im Browser: `http://<RASPBERRYPI-IP>:8090`
+
+## 🔗 Direkte Stream-URLs
+
+Raw uStreamer Feeds (direkt von den Cam-Containern):
+
+* **Kamera 1:** `http://<RASPBERRYPI-IP>:8081/stream`
+* **Kamera 2:** `http://<RASPBERRYPI-IP>:8082/stream`
+* **Kamera 3:** `http://<RASPBERRYPI-IP>:8083/stream`
 
 ---
 
-## 💡 Tips & Troubleshooting
+## 💡 Tipps & Fehlerbehebung
 
-### Format Issues
-If uStreamer fails with `Unknown pixel format: MJPEG`, ensure you use `--format=JPEG`. uStreamer expects the literal string `JPEG` for MJPEG devices.
+### Platform Warning
+Falls beim Start eine Warnung bezüglich der Plattform erscheint (`The requested image's platform does not match the detected host platform`), wurde in der `docker-compose.yml` bereits `platform: linux/arm64` hinterlegt, um sicherzustellen, dass auf einem Raspberry Pi das korrekte Image verwendet wird.
+
+### Format-Probleme
+Falls uStreamer mit `Unknown pixel format: MJPEG` abbricht, stelle sicher, dass `--format=JPEG` verwendet wird (uStreamer erwartet den String `JPEG`).
 
 ### Performance
-For Pi 4, `1280x720` @ `15 FPS` is a sweet spot. If it's choppy, try `960x540` or `10 FPS`.
+Für einen Pi 4 ist `1280x720` @ `15 FPS` meist ideal. Bei Rucklern versuche `960x540` oder `10 FPS`.
 
-### Persistent Device Names
-USB device numbering (`/dev/video0`, `/dev/video4`) can change on reboot. For a rock-solid setup, use `/dev/v4l/by-id/...` paths or udev rules.
+### Persistente Device-Namen
+USB-Nummerierungen (`/dev/video0`) können sich nach einem Reboot ändern. Nutze `/dev/v4l/by-id/...` Pfade in der `.env` für ein stabileres Setup.
 
-### Camera exposure quirks
-Some webcams flicker under indoor light. Try increasing FPS or disabling auto-exposure via `v4l2-ctl`.
-
-## 🏗 Extending to a third camera
-
-1. Add `CAM3_*` variables to `.env`.
-2. Add a `cam3` service to `compose.yaml`.
-3. Update `web/nginx.conf` and `web/index.html`.
+---
 
 ## 📜 Credits
 
-Built with:
+Gebaut mit:
 * [uStreamer](https://github.com/pikvm/ustreamer) (by PiKVM)
 * [Docker Compose](https://www.docker.com/)
 * [Nginx](https://nginx.org/)
 
 ---
 
-## ⚖️ License
+## ⚖️ Lizenz
 
 MIT
-
