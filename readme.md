@@ -153,8 +153,8 @@ Raw uStreamer Feeds (direkt von den Cam-Containern):
 
 ## 💡 Tipps & Fehlerbehebung
 
-### Platform Warning
-Falls beim Start eine Warnung bezüglich der Plattform erscheint (`The requested image's platform does not match the detected host platform`), wurde in der `docker-compose.yml` bereits `platform: linux/arm64` hinterlegt, um sicherzustellen, dass auf einem Raspberry Pi das korrekte Image verwendet wird.
+### Platform-Unterstützung
+Das Projekt nutzt das offizielle `pikvm/ustreamer` Image, welches als Multi-Arch-Image sowohl `amd64` als auch `arm64` (Raspberry Pi) nativ unterstützt. Eine manuelle `platform`-Angabe in der `docker-compose.yml` ist daher nicht mehr notwendig.
 
 ### Format-Probleme
 Falls uStreamer mit `Unknown pixel format: MJPEG` abbricht, stelle sicher, dass `--format=JPEG` verwendet wird (uStreamer erwartet den String `JPEG`).
